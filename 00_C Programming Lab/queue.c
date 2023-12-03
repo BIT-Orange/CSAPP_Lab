@@ -144,6 +144,10 @@ bool queue_insert_tail(queue_t *q, const char *s) {
 bool queue_remove_head(queue_t *q, char *buf, size_t bufsize) {
     /* You need to fix up this code. */
     q->head = q->head->next;
+    q->size--;
+    *buf = *(q->head->value);
+    bufsize = strlen(q->head->value);
+    free(q->head->value);
     return true;
 }
 
