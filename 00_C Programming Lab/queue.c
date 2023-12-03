@@ -10,7 +10,7 @@
  * Extended to store strings, 2018
  *
  * TODO: fill in your name and Andrew ID
- * @author XXX <XXX@andrew.cmu.edu>
+ * @author BIT-Orange
  */
 
 #include "queue.h"
@@ -26,7 +26,12 @@
 queue_t *queue_new(void) {
     queue_t *q = malloc(sizeof(queue_t));
     /* What if malloc returned NULL? */
-    q->head = NULL;
+    if(q)
+    {
+        q -> head = NULL;
+        q -> tail = NULL;
+        q -> size = 0;
+    }
     return q;
 }
 
@@ -37,7 +42,17 @@ queue_t *queue_new(void) {
 void queue_free(queue_t *q) {
     /* How about freeing the list elements and the strings? */
     /* Free queue structure */
-    free(q);
+    if(q){
+        list_ele_t *curr = q -> head, *next = NULL;
+        while (curr != NULL)
+        {
+            next = curr -> next;
+            free(curr -> value);
+            free(curr);
+            curr = next;
+        }
+        free(q);
+    }
 }
 
 /**
@@ -56,9 +71,20 @@ bool queue_insert_head(queue_t *q, const char *s) {
     list_ele_t *newh;
     /* What should you do if the q is NULL? */
     newh = malloc(sizeof(list_ele_t));
+    if (newh == NULL)
+        return false;
     /* Don't forget to allocate space for the string and copy it */
     /* What if either call to malloc returns NULL? */
+    newh->value = malloc(strlen(s) + 1);
+    if (newh->value == NULL) {
+        free(newh);
+        return false;
+    }
+    strcpy(newh->value, s);
+    q->size++;
     newh->next = q->head;
+    if(q->head == NULL)
+        q->tail = newh;
     q->head = newh;
     return true;
 }
@@ -78,7 +104,24 @@ bool queue_insert_head(queue_t *q, const char *s) {
 bool queue_insert_tail(queue_t *q, const char *s) {
     /* You need to write the complete code for this function */
     /* Remember: It should operate in O(1) time */
-    return false;
+    list_ele_t *newt;
+    newt = malloc(sizeof(list_ele_t));
+    if (newt == NULL)
+        return false;
+    newt->value = malloc(strlen(s) + 1);
+    if (newt->value == NULL) {
+        free(newt);
+        return false;
+    }
+    strcpy(newt->value, s);
+    q->size++;
+    newt->next = NULL;
+    if (q->head == NULL)
+        q->head = newt;
+    else
+        q->tail->next = newt;
+    q->tail = newt;
+    return true;
 }
 
 /**
