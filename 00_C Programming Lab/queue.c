@@ -26,11 +26,10 @@
 queue_t *queue_new(void) {
     queue_t *q = malloc(sizeof(queue_t));
     /* What if malloc returned NULL? */
-    if(q)
-    {
-        q -> head = NULL;
-        q -> tail = NULL;
-        q -> size = 0;
+    if(q){
+        q->head = NULL;
+        q->tail = NULL;
+        q->size = 0;
     }
     return q;
 }
@@ -44,8 +43,7 @@ void queue_free(queue_t *q) {
     /* Free queue structure */
     if(q){
         list_ele_t *curr = q -> head, *next = NULL;
-        while (curr != NULL)
-        {
+        while (curr != NULL){
             next = curr -> next;
             free(curr -> value);
             free(curr);
@@ -68,6 +66,8 @@ void queue_free(queue_t *q) {
  * @return false if q is NULL, or memory allocation failed
  */
 bool queue_insert_head(queue_t *q, const char *s) {
+    if(q == NULL)
+        return false;
     list_ele_t *newh;
     /* What should you do if the q is NULL? */
     newh = malloc(sizeof(list_ele_t));
@@ -75,16 +75,20 @@ bool queue_insert_head(queue_t *q, const char *s) {
         return false;
     /* Don't forget to allocate space for the string and copy it */
     /* What if either call to malloc returns NULL? */
-    newh->value = malloc(strlen(s) + 1);
-    if (newh->value == NULL) {
-        free(newh);
-        return false;
+    if(s != NULL){
+        newh->value = malloc(strlen(s) + 1);
+        if (newh->value == NULL) {
+            free(newh);
+            return false;
+        }
+        strcpy(newh->value, s);
     }
-    strcpy(newh->value, s);
+    else
+        newh->value = NULL;
     q->size++;
-    newh->next = q->head;
     if(q->head == NULL)
         q->tail = newh;
+    newh->next = q->head;
     q->head = newh;
     return true;
 }
@@ -104,16 +108,22 @@ bool queue_insert_head(queue_t *q, const char *s) {
 bool queue_insert_tail(queue_t *q, const char *s) {
     /* You need to write the complete code for this function */
     /* Remember: It should operate in O(1) time */
+    if(q == NULL)
+        return false;
     list_ele_t *newt;
     newt = malloc(sizeof(list_ele_t));
     if (newt == NULL)
         return false;
-    newt->value = malloc(strlen(s) + 1);
-    if (newt->value == NULL) {
-        free(newt);
-        return false;
+    if(s != NULL){
+        newt->value = malloc(strlen(s) + 1);
+        if (newt->value == NULL) {
+            free(newt);
+            return false;
+        }
+        strcpy(newt->value, s);
     }
-    strcpy(newt->value, s);
+    else
+        newt->value = NULL;
     q->size++;
     newt->next = NULL;
     if (q->head == NULL)
@@ -143,11 +153,22 @@ bool queue_insert_tail(queue_t *q, const char *s) {
  */
 bool queue_remove_head(queue_t *q, char *buf, size_t bufsize) {
     /* You need to fix up this code. */
+    if(q == NULL || q->head == NULL)
+        return false;
+    if (buf){
+        int i;
+        for (i = 0; i < (int)bufsize - 1; i++)
+            if(*(q->head->value + i) != '\0')
+                *(buf + i) = *(q->head->value + i);
+            else
+                break;
+        *(buf + i) = '\0';
+    }
+    list_ele_t *tmp = q->head;
     q->head = q->head->next;
+    free(tmp->value);
+    free(tmp);
     q->size--;
-    *buf = *(q->head->value);
-    bufsize = strlen(q->head->value);
-    free(q->head->value);
     return true;
 }
 
@@ -164,7 +185,10 @@ bool queue_remove_head(queue_t *q, char *buf, size_t bufsize) {
 size_t queue_size(queue_t *q) {
     /* You need to write the code for this function */
     /* Remember: It should operate in O(1) time */
-    return 0;
+    if(q && q->head)
+        return q->size;
+    else
+        return 0;
 }
 
 /**
@@ -178,4 +202,16 @@ size_t queue_size(queue_t *q) {
  */
 void queue_reverse(queue_t *q) {
     /* You need to write the code for this function */
+    if(q && q->head && q->head->next){
+        list_ele_t *pre = NULL, *cur = q->head, *next = q->head->next;
+        while(next != NULL){
+            cur->next = pre;
+            pre = cur;
+            cur = next;
+            next = next->next;
+        }
+        cur->next = pre;
+        q->tail = q->head;
+        q->head = cur;
+    }
 }
